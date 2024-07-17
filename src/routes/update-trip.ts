@@ -4,6 +4,7 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from 'zod';
 import { dayjs } from "../lib/dayjs";
 import { prisma } from "../lib/prisma";
+import { ClientError } from '../errors/client-error';
 
 
 export async function updateTrip(app: FastifyInstance) {
@@ -30,15 +31,15 @@ export async function updateTrip(app: FastifyInstance) {
     });
 
     if (!trip) {
-      throw new Error('Trip not found.');
+      throw new ClientError('Trip not found.');
     }
 
     // Validar datas
     if (dayjs(starts_at).isBefore(new Date())) {
-      throw new Error('A data de início da viagem não pode ser anterior à data atual.');
+      throw new ClientError('A data de início da viagem não pode ser anterior à data atual.');
     }
     if (dayjs(ends_at).isBefore(starts_at)) {
-      throw new Error('A data de término da viagem não pode ser anterior à data de início.');
+      throw new ClientError('A data de término da viagem não pode ser anterior à data de início.');
     }
 
     await prisma.trip.update({
